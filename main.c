@@ -6,9 +6,15 @@ int main(void){
     
     char buffer[MAX_BUFFER_SIZE];  
 
-    while (*(fgets(buffer, MAX_BUFFER_SIZE, stdin)) != EOF)
-    {
-        printf("%s\n", buffer);
+    while (1)
+    {   
+        printf(">");
+        if(fgets(buffer, MAX_BUFFER_SIZE, stdin) != NULL){
+            printf("%s", buffer);
+        }else{
+            printf("\n");
+            break;
+        }
     }
     
 
