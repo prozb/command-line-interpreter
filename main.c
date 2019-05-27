@@ -9,7 +9,6 @@ int main(void){
 
     Command command_objects [MAX_COMMANDS_SIZE + 1];
     int num_commands = 0; 
-    
     while (1)
     {   
         printf(">");
@@ -51,6 +50,7 @@ int get_command(Command *command, char *command_s, int max_args_count, char *del
 
     while (token != NULL && counter <= max_args_count){
         if(counter == 0){
+            // char *trimed = strdup(token);
             command->program = token;
         }else{
             command->arguments[counter - 1] = token;

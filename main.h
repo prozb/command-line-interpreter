@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 
 #define MAX_BUFFER_SIZE 500       // length of the one line read from user
 #define MAX_COMMANDS_SIZE 10
@@ -20,5 +21,25 @@ typedef struct command {
 int split_line(char buffer[], char *commands[], int commands_s, char *delim);
 /**Splitting command to program name and arguments*/
 int get_command(Command *command, char *command_s, int max_args_count, char *delim);
+
+/** trim leading and trailing spaces, returning new string*/
+char *trim_string(char s[]){
+    // skipping leading spaces
+    printf("string: %s\n", s);
+    while(isspace(*s)){
+        printf("skipping space\n");
+        s = s + 1;
+    }
+
+    int len = strlen(s);
+    char *end = s + strlen(s) - 1;
+    while(end >= s && isspace(*end)){
+        end = end - 1;
+    }
+    *(end + 1) = '\0';
+ 
+    len = strlen(s);
+    return s;
+}
 
 #endif
