@@ -5,7 +5,7 @@
 #include <string.h>
 
 #define MAX_BUFFER_SIZE 500       // length of the one line read from user
-#define MAX_COMMANDS_SIZE 21
+#define MAX_COMMANDS_SIZE 10
 #define MAX_ARGS_COUNT 19         // how much arguments can have one command 
 #define DEFAULT_DELIM ";"         // default commands separator
 #define ARGS_DELIM " "            // default arguments separator

@@ -5,8 +5,10 @@ int main(void){
     printf("start\n");
     
     char buffer[MAX_BUFFER_SIZE];  
-    char *commands[MAX_COMMANDS_SIZE];
-    Command command_objects [MAX_ARGS_COUNT];
+    char *commands[MAX_COMMANDS_SIZE + 1];
+
+    Command command_objects [MAX_COMMANDS_SIZE + 1];
+    int num_commands = 0; 
     
     while (1)
     {   
@@ -21,18 +23,19 @@ int main(void){
 
                 while ((current_command = commands[counter++]) != NULL)
                 {
-                    printf("%d command: %s\n", counter, current_command);    
                     //command is maximum 20 words (first word is command name
                     // and 19 another are arguments) arguments are separated 
                     // by one or more whitespaces
                     Command command;
                     get_command(&command, current_command, MAX_ARGS_COUNT, ARGS_DELIM);
-                    commands[counter - 1];
+                    // pushing command object to all commands
+
+                    //todo 27.05.2019 implement ignoring empty commands
+                    printf("adding command: %s\n", command.program);
+                    command_objects[counter - 1] = command;
+                    num_commands++;
                 }
-            }else
-            {  
-                printf("info: cannot split line into commands");
-            }        
+            }      
         }else{
             printf("\n");
             break;
@@ -43,18 +46,14 @@ int main(void){
 }
 
 int get_command(Command *command, char *command_s, int max_args_count, char *delim){
-    printf ("Splitting string \"%s\" into tokens:\n", command_s);
-
     char *token = strtok(command_s, delim);
     int counter = 0;
 
     while (token != NULL && counter <= max_args_count){
         if(counter == 0){
             command->program = token;
-            printf("commands: %s\n", token);
         }else{
             command->arguments[counter - 1] = token;
-            printf("args: %s\n", token);
         }
         token = strtok(NULL, delim);
         counter++;
