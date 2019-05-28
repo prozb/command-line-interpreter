@@ -30,9 +30,11 @@ int main(void){
                     // pushing command object to all commands
 
                     //todo 27.05.2019 implement ignoring empty commands
-                    printf("adding command: %s\n", command.program);
-                    command_objects[counter - 1] = command;
-                    num_commands++;
+                    if(command.program != NULL && strcmp(command.program, "\n") != 0){
+                        printf("adding command: %s\n", command.program);
+                        command_objects[counter - 1] = command;
+                        num_commands++;
+                    }
                 }
             }      
         }else{
@@ -46,11 +48,16 @@ int main(void){
 
 int get_command(Command *command, char *command_s, int max_args_count, char *delim){
     char *token = strtok(command_s, delim);
+    // todo 28.05.2019 make token to array and use tring function
     int counter = 0;
 
     while (token != NULL && counter <= max_args_count){
+        char token_arr[strlen(token)];
+        strcpy(token_arr, token);
+        trim_string(token_arr);
+
         if(counter == 0){
-            // char *trimed = strdup(token);
+            // char token_arr = token;
             command->program = token;
         }else{
             command->arguments[counter - 1] = token;

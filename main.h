@@ -25,9 +25,7 @@ int get_command(Command *command, char *command_s, int max_args_count, char *del
 /** trim leading and trailing spaces, returning new string*/
 char *trim_string(char s[]){
     // skipping leading spaces
-    printf("string: %s\n", s);
     while(isspace(*s)){
-        printf("skipping space\n");
         s = s + 1;
     }
 
