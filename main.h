@@ -36,7 +36,6 @@ char *trim_string(char s[]){
     }
     *(end + 1) = '\0';
  
-    len = strlen(s);
     return s;
 }
 
