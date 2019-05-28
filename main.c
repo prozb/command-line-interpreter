@@ -1,4 +1,3 @@
-
 #include "main.h"
 
 int main(void){
@@ -11,7 +10,7 @@ int main(void){
     int num_commands = 0; 
     while (1)
     {   
-        printf(">");
+        printf(">"); 
         if(fgets(buffer, MAX_BUFFER_SIZE, stdin) != NULL){
             // processing commands separated by semicolons
             // max commands number is 10 and min is 0
@@ -29,14 +28,28 @@ int main(void){
                     get_command(&command, current_command, MAX_ARGS_COUNT, ARGS_DELIM);
                     // pushing command object to all commands
 
-                    //todo 27.05.2019 implement ignoring empty commands
                     if(command.program != NULL && strcmp(command.program, "\n") != 0){
-                        printf("adding command: %s\n", command.program);
                         command_objects[counter - 1] = command;
                         num_commands++;
                     }
                 }
+            }
+
+            //executing commands
+            for(int i = 0; i < num_commands; i++){
+                if(command_objects[i].program != NULL){
+                    printf("executing command: %s, with args: %s\n", command_objects[i].program,
+                    *(command_objects[i].arguments));
+                }
             }      
+
+            //print statistics for command
+
+            //clear commands
+            for(int i = 0; i < num_commands; i++){
+                command_objects[i].program = NULL;
+            }
+            num_commands = 0;
         }else{
             printf("\n");
             break;
@@ -48,19 +61,28 @@ int main(void){
 
 int get_command(Command *command, char *command_s, int max_args_count, char *delim){
     char *token = strtok(command_s, delim);
-    // todo 28.05.2019 make token to array and use tring function
     int counter = 0;
 
     while (token != NULL && counter <= max_args_count){
-        char token_arr[strlen(token)];
-        strcpy(token_arr, token);
-        trim_string(token_arr);
+        int t_size = strlen(token);
+        char t_array[t_size + 1];
+        char *modified_token = malloc(sizeof(char) * (t_size + 1));
 
-        if(counter == 0){
-            // char token_arr = token;
-            command->program = token;
-        }else{
-            command->arguments[counter - 1] = token;
+        strcpy(t_array, token);
+        t_array[t_size] = '\0';
+
+        if(t_size > 0 && t_array[t_size - 1] == '\n'){
+            t_array[t_size - 1] = '\0';
+        }
+        trim_string(t_array);
+        strcpy(modified_token, t_array);
+
+        if(t_array[0] != '\0'){
+            if(counter == 0){
+                command->program = modified_token;
+                counter++;
+            }
+            command->arguments[counter - 1] = modified_token;
         }
         token = strtok(NULL, delim);
         counter++;
