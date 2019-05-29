@@ -1,13 +1,14 @@
 #include "main.h"
 
+Command command_objects [MAX_COMMANDS_SIZE + 1];
+int num_commands = 0; 
+
 int main(void){
     printf("start\n");
     
     char buffer[MAX_BUFFER_SIZE];  
     char *commands[MAX_COMMANDS_SIZE + 1];
 
-    Command command_objects [MAX_COMMANDS_SIZE + 1];
-    int num_commands = 0; 
     while (1)
     {   
         printf(">"); 
@@ -24,13 +25,12 @@ int main(void){
                     //command is maximum 20 words (first word is command name
                     // and 19 another are arguments) arguments are separated 
                     // by one or more whitespaces
-                    Command command;
-                    get_command(&command, current_command, MAX_ARGS_COUNT, ARGS_DELIM);
+                    Command *command = (malloc(sizeof(char *) + sizeof(char *) * (MAX_ARGS_COUNT + 1)));
+                    get_command(command, current_command, MAX_ARGS_COUNT, ARGS_DELIM);
                     // pushing command object to all commands
 
-                    if(command.program != NULL && strcmp(command.program, "\n") != 0){
-                        command_objects[counter - 1] = command;
-                        num_commands++;
+                    if((*command).program != NULL && strcmp((*command).program, "\n") != 0){
+                        command_objects[num_commands++] = *command;
                     }
                 }
             }
@@ -40,16 +40,17 @@ int main(void){
                 if(command_objects[i].program != NULL){
                     printf("executing command: %s, with args: %s\n", command_objects[i].program,
                     *(command_objects[i].arguments));
+
+
+
+                    clean_command(i);
                 }
             }      
+            //reset commands counter
+            num_commands = 0;
 
             //print statistics for command
 
-            //clear commands
-            for(int i = 0; i < num_commands; i++){
-                command_objects[i].program = NULL;
-            }
-            num_commands = 0;
         }else{
             printf("\n");
             break;
@@ -105,4 +106,15 @@ int split_line(char buffer[], char *commands[], int commands_s, char *delim){
     commands[counter] = NULL;
 
     return 1;
+}
+
+int clean_command(int n){
+    if(n >= 0 && n < num_commands){
+        command_objects[n].program = NULL;
+        command_objects[n].arguments[0] = NULL;
+
+        return 1;
+    }
+
+    return 0;
 }

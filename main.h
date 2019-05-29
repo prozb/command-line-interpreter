@@ -43,5 +43,7 @@ char *trim_string(char s[]){
  
     return s;
 }
+/** method cleans executed command*/
+int clean_command(int);
 
 #endif
