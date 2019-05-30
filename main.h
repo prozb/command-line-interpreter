@@ -12,13 +12,18 @@
 #define MAX_ARGS_COUNT 20         // how much arguments can have one command 
 #define DEFAULT_DELIM ";"         // default commands separator
 #define ARGS_DELIM " "            // default arguments separator
+#define PROCESS_FAILED 1
+#define PROCESS_SUCCEED 2
 
 typedef struct command {
     char *program;                      // POSIX command name
     char *arguments[MAX_ARGS_COUNT + 1]; // reserve one slot for NULL
 } Command;
 
-
+/** executes forks */
+int creating_forks(Command commands[], int size);
+/** cleand all commands in commands array*/
+int clean_commands(Command commands[], int size);
 /**splitting buffer into command*/
 int split_line(char buffer[], char *commands[], int commands_s, char *delim);
 /**Splitting command to program name and arguments*/
@@ -45,5 +50,6 @@ char *trim_string(char s[]){
 }
 /** method cleans executed command*/
 int clean_command(int);
+
 
 #endif

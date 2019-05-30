@@ -15,12 +15,12 @@ int main(void){
     // }   
     // printf("%d\n", pid1);
 
-    char *cmd   = "ls";
+    char *cmd   = "asdas";
 
     printf("starting\n");
     Command command;
     command.program   = cmd;
-    command.arguments[0] = "ls";
+    command.arguments[0] = "asdasd";
     command.arguments[1] = "-la";
     command.arguments[2] = NULL;
 
@@ -37,14 +37,17 @@ int main(void){
         printf("executing command: %s\n", *(command.arguments));
         if(execvp(command.program,  command.arguments)){
             printf("execuing ok\n");
+            return 0;
         }else{
             printf("failed\n");
+            return 1;
         }
     }else{
         int status;
         printf("waiting for child process\n");
         if(wait(&status) == pid){
             printf("child process %d ended\n", pid);
+            printf("success: %d\n", WIFEXITED(status));
         }else{
             wait(&status);
         }

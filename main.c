@@ -1,4 +1,6 @@
 #include "main.h"
+#include  <sys/types.h>
+#include  <sys/wait.h>
 
 Command command_objects [MAX_COMMANDS_SIZE + 1];
 int num_commands = 0; 
@@ -16,7 +18,7 @@ int main(void){
             // processing commands separated by semicolons
             // max commands number is 10 and min is 0
             
-            if(split_line(buffer, commands, MAX_COMMANDS_SIZE, DEFAULT_DELIM)){
+            if(split_line(buffer, commands, MAX_COMMANDS_SIZE, DEFAULT_DELIM) == 0){
                 char *current_command;
                 int counter = 0;
 
@@ -35,28 +37,59 @@ int main(void){
                 }
             }
 
-            //executing commands
-            for(int i = 0; i < num_commands; i++){
-                if(command_objects[i].program != NULL){
-                    printf("executing command: %s, with args: %s\n", command_objects[i].program,
-                    *(command_objects[i].arguments));
-
-
-
-                    clean_command(i);
-                }
-            }      
-            //reset commands counter
-            num_commands = 0;
-
+            creating_forks(command_objects, num_commands);
+            clean_commands(command_objects, num_commands);
             //print statistics for command
-
         }else{
             printf("\n");
             break;
         }
     }
     
+    return 0;
+}
+
+int creating_forks(Command commands[], int size){
+    int counter = 0;
+    pid_t result_pid;
+    printf("creating forks in parent process\n");
+
+    do{
+        // skipping null command
+        if(commands[counter].program == NULL){
+            counter++;
+            continue;
+        }
+        result_pid = fork();
+
+        if(result_pid == 0){
+            int result = execute_command(&(commands[counter]));
+            printf("process %d executed result: %d\n", getpid(), result);
+            exit(0);
+        }
+        counter++;
+    }while((result_pid != 0 && result_pid != -1) && (counter < size));
+
+    //waiting for all child processes
+    if(result_pid > 0){
+        int status = 0;
+        int wpid;
+
+        while((wpid = wait(&status)) > 0){
+            printf("process %d terminating\n", wpid);
+        }
+    }
+
+    return 0;
+}
+
+int clean_commands(Command commands[], int size){
+    for(int i = 0; i < size; i++){
+        clean_command(i);
+    }
+    // reset counter
+    num_commands = 0;
+
     return 0;
 }
 
@@ -91,7 +124,7 @@ int get_command(Command *command, char *command_s, int max_args_count, char *del
 
     command->arguments[counter - 1] = NULL;
 
-    return 1;
+    return 0;
 }
 
 int split_line(char buffer[], char *commands[], int commands_s, char *delim){
@@ -105,7 +138,7 @@ int split_line(char buffer[], char *commands[], int commands_s, char *delim){
     }
     commands[counter] = NULL;
 
-    return 1;
+    return 0;
 }
 
 int clean_command(int n){
@@ -113,8 +146,8 @@ int clean_command(int n){
         command_objects[n].program = NULL;
         command_objects[n].arguments[0] = NULL;
 
-        return 1;
+        return 0;
     }
 
-    return 0;
+    return 1;
 }
