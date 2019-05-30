@@ -11,7 +11,7 @@ int main(void){
     char buffer[MAX_BUFFER_SIZE];  
     char *commands[MAX_COMMANDS_SIZE + 1];
 
-    while (1)
+    while (TRUE)
     {   
         printf(">"); 
         if(fgets(buffer, MAX_BUFFER_SIZE, stdin) != NULL){
@@ -39,13 +39,23 @@ int main(void){
 
             creating_forks(command_objects, num_commands);
             print_statistics(command_objects, num_commands);
-            num_commands = clean_commands(command_objects, num_commands);
+            clean_commands(command_objects, &num_commands);
         }else{
             printf("\n");
             break;
         }
     }
     
+    return 0;
+}
+
+int clean_commands(Command commands[], int *size){
+    for(int i = 0; i < *size; i++){
+        commands[i].program = NULL;
+        commands[i].arguments[0] = NULL;
+    }
+    *size = 0;
+
     return 0;
 }
 

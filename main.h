@@ -12,8 +12,7 @@
 #define MAX_ARGS_COUNT 20         // how much arguments can have one command 
 #define DEFAULT_DELIM ";"         // default commands separator
 #define ARGS_DELIM " "            // default arguments separator
-#define PROCESS_FAILED 1
-#define PROCESS_SUCCEED 2
+#define TRUE 1
 #define COMMAND_SIZE (sizeof(char *) + sizeof(char *) * (MAX_ARGS_COUNT + 1) + 2 * sizeof(int))
 
 typedef struct command {
@@ -37,14 +36,7 @@ int set_exit_code(Command commands[], int size, int code, int pid){
 /** executes forks */
 int creating_forks(Command commands[], int size);
 /** cleand all commands in commands array*/
-int clean_commands(Command commands[], int size){
-    for(int i = 0; i < size; i++){
-        commands[i].program = NULL;
-        commands[i].arguments[0] = NULL;
-    }
-
-    return 0;
-}
+int clean_commands(Command commands[], int *size);
 /**splitting buffer into command*/
 int split_line(char buffer[], char *commands[], int commands_s, char *delim);
 /**Splitting command to program name and arguments*/
