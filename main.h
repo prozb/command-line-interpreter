@@ -14,16 +14,37 @@
 #define ARGS_DELIM " "            // default arguments separator
 #define PROCESS_FAILED 1
 #define PROCESS_SUCCEED 2
+#define COMMAND_SIZE (sizeof(char *) + sizeof(char *) * (MAX_ARGS_COUNT + 1) + 2 * sizeof(int))
 
 typedef struct command {
-    char *program;                      // POSIX command name
+    char *program;                       // POSIX command name
     char *arguments[MAX_ARGS_COUNT + 1]; // reserve one slot for NULL
+    int pid;                             // pid where command will be executed   
+    int exit_code;                       // exit code
 } Command;
 
+/** adding result to command executed in process*/
+int set_exit_code(Command commands[], int size, int code, int pid){
+    for(int i = 0; i < size; i++){
+        if(commands[i].pid == pid){
+            commands[i].exit_code = code;
+
+            return 0;
+        }
+    }
+    return 1;
+}
 /** executes forks */
 int creating_forks(Command commands[], int size);
 /** cleand all commands in commands array*/
-int clean_commands(Command commands[], int size);
+int clean_commands(Command commands[], int size){
+    for(int i = 0; i < size; i++){
+        commands[i].program = NULL;
+        commands[i].arguments[0] = NULL;
+    }
+
+    return 0;
+}
 /**splitting buffer into command*/
 int split_line(char buffer[], char *commands[], int commands_s, char *delim);
 /**Splitting command to program name and arguments*/
@@ -48,8 +69,16 @@ char *trim_string(char s[]){
  
     return s;
 }
-/** method cleans executed command*/
-int clean_command(int);
 
+/** printing statistics for each command */
+int print_statistics(Command commands[], int size){
+    // todo: cumulative sum 
+    for(int i = 0; i < size; i++){
+        printf("%s: exit status: %d, pid: %d\n", commands[i].program, commands[i].exit_code, 
+        commands[i].pid);
+    }
+
+    return 0;
+}
 
 #endif

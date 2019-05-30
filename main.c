@@ -27,7 +27,7 @@ int main(void){
                     //command is maximum 20 words (first word is command name
                     // and 19 another are arguments) arguments are separated 
                     // by one or more whitespaces
-                    Command *command = (malloc(sizeof(char *) + sizeof(char *) * (MAX_ARGS_COUNT + 1)));
+                    Command *command = (malloc(COMMAND_SIZE));
                     get_command(command, current_command, MAX_ARGS_COUNT, ARGS_DELIM);
                     // pushing command object to all commands
 
@@ -38,8 +38,8 @@ int main(void){
             }
 
             creating_forks(command_objects, num_commands);
-            clean_commands(command_objects, num_commands);
-            //print statistics for command
+            print_statistics(command_objects, num_commands);
+            num_commands = clean_commands(command_objects, num_commands);
         }else{
             printf("\n");
             break;
@@ -62,10 +62,14 @@ int creating_forks(Command commands[], int size){
         }
         result_pid = fork();
 
-        if(result_pid == 0){
+        if(result_pid < 0){
+            printf("error: not enough memory to create new process");
+        }if(result_pid > 0){
+            commands[counter].pid = result_pid;
+        }else if(result_pid == 0){
             int result = execute_command(&(commands[counter]));
             printf("process %d executed result: %d\n", getpid(), result);
-            exit(0);
+            exit(result);
         }
         counter++;
     }while((result_pid != 0 && result_pid != -1) && (counter < size));
@@ -76,22 +80,14 @@ int creating_forks(Command commands[], int size){
         int wpid;
 
         while((wpid = wait(&status)) > 0){
-            printf("process %d terminating\n", wpid);
+            int exit_status = WEXITSTATUS(status);
+            set_exit_code(command_objects, num_commands, exit_status, wpid);
         }
     }
 
     return 0;
 }
 
-int clean_commands(Command commands[], int size){
-    for(int i = 0; i < size; i++){
-        clean_command(i);
-    }
-    // reset counter
-    num_commands = 0;
-
-    return 0;
-}
 
 int get_command(Command *command, char *command_s, int max_args_count, char *delim){
     char *token = strtok(command_s, delim);
@@ -139,15 +135,4 @@ int split_line(char buffer[], char *commands[], int commands_s, char *delim){
     commands[counter] = NULL;
 
     return 0;
-}
-
-int clean_command(int n){
-    if(n >= 0 && n < num_commands){
-        command_objects[n].program = NULL;
-        command_objects[n].arguments[0] = NULL;
-
-        return 0;
-    }
-
-    return 1;
 }
