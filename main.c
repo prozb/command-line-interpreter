@@ -7,7 +7,6 @@ static int num_commands = 0;
 static struct tms proc_time;
 
 int main(void){
-    printf("start\n");
     char buffer[MAX_BUFFER_SIZE];  
     char *commands[MAX_COMMANDS_SIZE + 1];
 
@@ -15,7 +14,7 @@ int main(void){
 
     while (TRUE)
     {   
-        putchar('>'); 
+        printf("> "); 
         if(fgets(buffer, MAX_BUFFER_SIZE, stdin) != NULL){
             // processing commands separated by semicolons
             // max commands number is 10 and min is 0

@@ -1,0 +1,125 @@
+#! /bin/bash
+
+# ***************************************
+# author: Pavlo Rozbitski               *
+# date:   31.05.2019                    *
+# ***************************************
+# 
+# script for preparing files to operating systems
+# assignment mr. 1 at the THM
+# 
+# usage: place script into your projects root directory
+# and execute ./prepare_files username filename 
+# username - your university id
+# filename - main class
+
+team_name="BS-HU1.TEAM"
+make_name="mkhu1"
+user_name=$1
+file_name=$2
+
+current_dir=
+name=
+surname=
+stud_number=
+
+if [ "x${user_name}" == "x" ]; then 
+    printf "%s\n" "error: incorrect username";
+    exit 1;
+fi
+
+if [ "x${file_name}" == "x" ]; then 
+    printf "%s\n" "error: incorrect file name";
+    exit 1;
+fi
+
+if [ ! -f ${file_name} ]; then
+    printf "%s\n" "error: file ${file_name} does not exist";
+    exit 1;
+fi
+
+current_dir=$(pwd)
+printf "currernt dir: %s\n" ${current_dir}
+
+cd ..
+mkdir ${user_name}
+if [ ! -d ${user_name} ]; then
+    printf "%s\n" "error: cannot create directory ${user_name}"
+    exit 1;
+fi
+
+cd "${current_dir}" 
+cp -r * "../${user_name}/"
+
+if [ "$?" -ne 0 ]; then 
+    printf "%s\n" "error: cannot copy files"
+    rm -r "${user_name}"
+    cd "$current_dir"
+
+    exit 1;
+fi
+
+cd ../"${user_name}"
+
+cd "${current_dir}"
+touch "${team_name}" 
+
+read -p "Enter user name: " name
+if [ "x${name}" == "x" ]; then 
+    printf "%s\n" "error: incorrect name";
+    exit 1;
+fi
+
+read -p "Enter surname: " surname
+if [ "x${surname}" == "x" ]; then 
+    printf "%s\n" "error: incorrect surnamename";
+    exit 1;
+fi
+
+read -p "Enter student number(matrnr): " stud_number
+if [ "x${stud_number}" == "x" ]; then 
+    printf "%s\n" "error: incorrect student number(matrnr)";
+    exit 1;
+fi
+
+cd ..
+cd "${user_name}"
+printf "%s,%s,%s\n" "${name}" "${surname}" "${stud_number}" > "${team_name}"
+
+pwd
+touch "${make_name}"
+printf "gcc -Wall -o hu1 ${file_name}" > "${make_name}"
+chmod +x "${make_name}"
+# build your project
+./${make_name}
+
+if [ "$?" -ne 0 ]; then
+    printf "%s\n" "error: cannot build project"
+    cd ..
+    rm -rf "${user_name}"
+    exit 1
+fi
+
+cd ..
+
+# archive files
+
+tar -cvf "${user_name}.tar" "${user_name}"
+if [ "$?" -ne 0 ]; then
+    printf "%s\n" "error: cannot tar project"
+    rm -rf "${user_name}"
+    exit 1
+fi
+gzip "${user_name}.tar"
+if [ "$?" -ne 0 ]; then
+    printf "%s\n" "error: cannot gunzip project"
+    rm -f "${user_name}.tar"
+    rm -rf "${user_name}"
+    exit 1
+fi
+
+
+exit 0
+
+
+
