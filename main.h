@@ -38,7 +38,6 @@ int set_exit_code(Command commands[], int size, int code, int pid, long time){
 
 /** wasting time in user mode for testing reasons */
 void waste_time(int pid){
-    printf("wasting time\n");
     long long counter = 0;
 
     for(int i = 0; i < 1000000000; i++){
@@ -85,13 +84,16 @@ char *trim_string(char s[]){
 /** printing statistics for each command */
 int print_statistics(Command commands[], int size){
     // todo: cumulative sum 
+    long cum_stat = 0;
     for(int i = 0; i < size; i++){
         if(commands[i].exit_code == 0){
+            cum_stat += commands[i].exec_time;
             printf("%s: user time = %ld\n", commands[i].program, commands[i].exec_time);
         }else{
             printf("%s: [execution error]\n", commands[i].program);
         }
     }
+    printf("sum of user times = %ld\n", cum_stat);
 
     return 0;
 }
