@@ -62,8 +62,6 @@ fi
 cd ../"${user_name}"
 
 cd "${current_dir}"
-touch "${team_name}" 
-
 read -p "Enter user name: " name
 if [ "x${name}" == "x" ]; then 
     printf "%s\n" "error: incorrect name";
