@@ -11,13 +11,14 @@ int main(void){
     char buffer[MAX_BUFFER_SIZE];  
     char *commands[MAX_COMMANDS_SIZE + 1];
 
+    signal(SIGINT, sigint_handler);
+
     while (TRUE)
     {   
-        printf(">"); 
+        putchar('>'); 
         if(fgets(buffer, MAX_BUFFER_SIZE, stdin) != NULL){
             // processing commands separated by semicolons
             // max commands number is 10 and min is 0
-            
             if(split_line(buffer, commands, MAX_COMMANDS_SIZE, DEFAULT_DELIM) == 0){
                 char *current_command;
                 int counter = 0;
@@ -32,16 +33,16 @@ int main(void){
                     // pushing command object to all commands
 
                     if((*command).program != NULL && strcmp((*command).program, "\n") != 0){
+                        command->exit_code = 255;
                         command_objects[num_commands++] = *command;
                     }
                 }
             }
-
             creating_forks(command_objects, num_commands);
             print_statistics(command_objects, num_commands);
             clean_commands(command_objects, &num_commands);
         }else{
-            printf("\n");
+            putchar('\n');
             break;
         }
     }
@@ -53,6 +54,7 @@ int clean_commands(Command commands[], int *size){
     for(int i = 0; i < *size; i++){
         commands[i].program = NULL;
         commands[i].arguments[0] = NULL;
+        commands[i].exit_code = 255;
     }
     *size = 0;
 
@@ -62,8 +64,6 @@ int clean_commands(Command commands[], int *size){
 int creating_forks(Command commands[], int size){
     int counter = 0;
     pid_t result_pid;
-    printf("creating forks in parent process\n");
-
     do{
         // skipping null command
         if(commands[counter].program == NULL){
@@ -77,8 +77,6 @@ int creating_forks(Command commands[], int size){
         }if(result_pid > 0){
             commands[counter].pid = result_pid;
         }else if(result_pid == 0){
-            waste_time(getpid());
-
             int result = execute_command(&(commands[counter]));
             exit(result);
         }
@@ -98,8 +96,7 @@ int creating_forks(Command commands[], int size){
 
                 clock_t end_time = proc_time.tms_cutime;
                 int exit_status  = WEXITSTATUS(status);
-
-                long user_time = end_time - start_time;
+                long user_time   = end_time - start_time;
 
                 set_exit_code(command_objects, num_commands, exit_status, wpid, user_time);
             }else{
@@ -110,7 +107,6 @@ int creating_forks(Command commands[], int size){
 
     return 0;
 }
-
 
 int get_command(Command *command, char *command_s, int max_args_count, char *delim){
     char *token = strtok(command_s, delim);
@@ -144,6 +140,12 @@ int get_command(Command *command, char *command_s, int max_args_count, char *del
     command->arguments[counter - 1] = NULL;
 
     return 0;
+}
+
+void sigint_handler(int signum){
+    printf("\n");
+    print_statistics(command_objects, num_commands);
+    exit(0);
 }
 
 int split_line(char buffer[], char *commands[], int commands_s, char *delim){

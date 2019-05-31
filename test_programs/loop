@@ -1,0 +1,6 @@
+#! /bin/bash
+
+counter=
+for var in {1..700000}; do
+    counter=( $counter + $var ) 
+done

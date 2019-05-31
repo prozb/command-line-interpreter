@@ -7,6 +7,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/times.h>
+#include <signal.h>
+#include <errno.h>
 
 #define MAX_BUFFER_SIZE 500       // length of the one line read from user
 #define MAX_COMMANDS_SIZE 10
@@ -24,12 +26,14 @@ typedef struct command {
     long exec_time;                   // command execution time
 } Command;
 
+
 /** adding result and execution time to command executed in process*/
 int set_exit_code(Command commands[], int size, int code, int pid, long time){
     for(int i = 0; i < size; i++){
         if(commands[i].pid == pid){
             commands[i].exit_code = code;
             commands[i].exec_time = time;
+
             return 0;
         }
     }
@@ -48,6 +52,8 @@ void waste_time(int pid){
 void start_clock(struct tms *proc_time){
     times(proc_time);
 }
+/** sigint handler */
+void sigint_handler(int signum);
 /** ending clock for main process */
 void end_clock(struct tms *proc_time){
     times(proc_time);
@@ -81,21 +87,23 @@ char *trim_string(char s[]){
     return s;
 }
 
-/** printing statistics for each command */
+/** printing statistics for each command and terminating program*/
 int print_statistics(Command commands[], int size){
-    // todo: cumulative sum 
-    long cum_stat = 0;
-    for(int i = 0; i < size; i++){
-        if(commands[i].exit_code == 0){
-            cum_stat += commands[i].exec_time;
-            printf("%s: user time = %ld\n", commands[i].program, commands[i].exec_time);
-        }else{
-            printf("%s: [execution error]\n", commands[i].program);
+    if(commands != NULL && commands[0].program != NULL){
+        long cum_stat = 0;
+        for(int i = 0; i < size; i++){
+            if(commands[i].exit_code == 0){
+                cum_stat += commands[i].exec_time;
+                printf("%s: user time = %ld\n", commands[i].program, commands[i].exec_time);
+            }else{
+                printf("%s: [execution error]\n", commands[i].program);
+            }
         }
-    }
-    printf("sum of user times = %ld\n", cum_stat);
+        printf("sum of user times = %ld\n", cum_stat);
 
-    return 0;
+        return 0;
+    }
+    return 1;
 }
 
 #endif
