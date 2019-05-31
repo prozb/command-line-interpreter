@@ -1,13 +1,13 @@
 #include "main.h"
-#include  <sys/types.h>
-#include  <sys/wait.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
-Command command_objects [MAX_COMMANDS_SIZE + 1];
-int num_commands = 0; 
+static Command command_objects [MAX_COMMANDS_SIZE + 1];
+static int num_commands = 0; 
+static struct tms proc_time;
 
 int main(void){
     printf("start\n");
-    
     char buffer[MAX_BUFFER_SIZE];  
     char *commands[MAX_COMMANDS_SIZE + 1];
 
@@ -77,8 +77,9 @@ int creating_forks(Command commands[], int size){
         }if(result_pid > 0){
             commands[counter].pid = result_pid;
         }else if(result_pid == 0){
+            waste_time(getpid());
+
             int result = execute_command(&(commands[counter]));
-            printf("process %d executed result: %d\n", getpid(), result);
             exit(result);
         }
         counter++;
@@ -89,9 +90,21 @@ int creating_forks(Command commands[], int size){
         int status = 0;
         int wpid;
 
-        while((wpid = wait(&status)) > 0){
-            int exit_status = WEXITSTATUS(status);
-            set_exit_code(command_objects, num_commands, exit_status, wpid);
+        while(TRUE){
+            start_clock(&proc_time);
+            clock_t start_time = proc_time.tms_cutime;
+            if((wpid = wait(&status)) > 0){
+                end_clock(&proc_time);
+
+                clock_t end_time = proc_time.tms_cutime;
+                int exit_status  = WEXITSTATUS(status);
+
+                long user_time = end_time - start_time;
+
+                set_exit_code(command_objects, num_commands, exit_status, wpid, user_time);
+            }else{
+                break;
+            }
         }
     }
 
@@ -146,3 +159,5 @@ int split_line(char buffer[], char *commands[], int commands_s, char *delim){
 
     return 0;
 }
+
+
